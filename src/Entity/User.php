@@ -3,14 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ORM\Table(name="`user`")
  */
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -35,6 +37,22 @@ class User implements UserInterface
      */
     private $password;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Role::class, mappedBy="users")
+     */
+    private $roles2;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Permission::class, mappedBy="users")
+     */
+    private $permissions;
+
+    public function __construct()
+    {
+        $this->roles2 = new ArrayCollection();
+        $this->permissions = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -57,7 +75,7 @@ class User implements UserInterface
      *
      * @see UserInterface
      */
-    public function getUsername(): string
+    public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
@@ -68,10 +86,8 @@ class User implements UserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // $roles = [$roles];
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-        // dd($roles);
 
         return array_unique($roles);
     }
@@ -84,11 +100,11 @@ class User implements UserInterface
     }
 
     /**
-     * @see UserInterface
+     * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return $this->password;
     }
 
     public function setPassword(string $password): self
@@ -99,22 +115,69 @@ class User implements UserInterface
     }
 
     /**
-     * Returning a salt is only needed, if you are not using a modern
-     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
-     *
-     * @see UserInterface
-     */
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    /**
      * @see UserInterface
      */
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getUsername(){
+        return $this->email;
+    }
+
+    /**
+     * @return Collection|Role[]
+     */
+    public function getRoles2(): Collection
+    {
+        return $this->roles2;
+    }
+
+    public function addRoles2(Role $roles2): self
+    {
+        if (!$this->roles2->contains($roles2)) {
+            $this->roles2[] = $roles2;
+            $roles2->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoles2(Role $roles2): self
+    {
+        if ($this->roles2->removeElement($roles2)) {
+            $roles2->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Permission[]
+     */
+    public function getPermissions(): Collection
+    {
+        return $this->permissions;
+    }
+
+    public function addPermission(Permission $permission): self
+    {
+        if (!$this->permissions->contains($permission)) {
+            $this->permissions[] = $permission;
+            $permission->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePermission(Permission $permission): self
+    {
+        if ($this->permissions->removeElement($permission)) {
+            $permission->removeUser($this);
+        }
+
+        return $this;
     }
 }
