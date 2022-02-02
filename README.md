@@ -14,23 +14,30 @@ This is a project creted to be used as a template to acelerated building develop
 ~$ composer install
 ```
 
-## Generating ssl keys
+## Configuring environments
 
-### Development environment
+### Generating ssl keys
 
 ```bash
+# For development environment
 ~$ ./bin/console lexik:jwt:generate-keypair
-```
-
-### Testing environment
-
-```bash
+# For testing environment
 ~$ openssl genrsa -out config/jwt/private-test.pem -aes256 4096
 ~$ openssl rsa -pubout -in config/jwt/private-test.pem -out config/jwt/public-test.pem
 ```
 
-### Configure enviroment variables (dotenv file)
+### Configure environment variables (dotenv file)
 
 ```bash
 ~$ cp .env .env.local
+# The .env.testing file already exists in project directory
+```
+
+### Creating database
+
+```bash
+# For development environment
+~$ php bin/console doctrine:database:create
+# For testing environment
+~$ php bin/console --env=test doctrine:database:create
 ```
