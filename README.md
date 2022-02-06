@@ -8,13 +8,20 @@ This is a project creted to be used as a template to acelerated building develop
 
 ![repository as a template](./docs/img/repository-template.png)
 
-## Installing dependencies
+## Configuring environments
+
+### Configuring environment variables (dotenv file)
+
+```bash
+~$ cp .env .env.local
+# The .env.testing file already exists in project directory
+```
+
+### Installing dependencies
 
 ```bash
 ~$ composer install
 ```
-
-## Configuring environments
 
 ### Generating ssl keys
 
@@ -26,13 +33,6 @@ This is a project creted to be used as a template to acelerated building develop
 ~$ openssl rsa -pubout -in config/jwt/private-test.pem -out config/jwt/public-test.pem
 ```
 
-### Configure environment variables (dotenv file)
-
-```bash
-~$ cp .env .env.local
-# The .env.testing file already exists in project directory
-```
-
 ### Creating database
 
 ```bash
@@ -40,4 +40,13 @@ This is a project creted to be used as a template to acelerated building develop
 ~$ php bin/console doctrine:database:create
 # For testing environment
 ~$ php bin/console --env=test doctrine:database:create
+```
+
+### Applying migrations
+
+```bash
+# For development environment
+~$ php bin/console doctrine:migrations:migrate
+# For testing environment
+~$ php bin/console --env=test doctrine:migrations:migrate
 ```
